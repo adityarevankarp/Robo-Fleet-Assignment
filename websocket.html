@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robotair WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Robotair WebSocket Test</h1>
+    <div id="robot-data"></div>
+
+    <script>
+        // Connect to the WebSocket server
+        const socket = io('http://localhost:5000');
+
+        // Listen for robot updates
+        socket.on('robot_update', function(robots) {
+            const dataDiv = document.getElementById('robot-data');
+            dataDiv.innerHTML = '<h2>Received Robot Data:</h2>';
+            
+            robots.forEach(robot => {
+                dataDiv.innerHTML += `
+                    <div>
+                        <strong>Robot ID:</strong> ${robot['Robot ID']}<br>
+                        <strong>Online:</strong> ${robot['Online/Offline']}<br>
+                        <strong>Battery:</strong> ${robot['Battery Percentage']}%<br>
+                        <strong>CPU Usage:</strong> ${robot['CPU Usage']}%<br>
+                        <strong>Location:</strong> ${robot['Location Coordinates']}<br>
+                        <hr>
+                    </div>
+                `;
+            });
+        });
+
+        // Connection established
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket server');
+        });
+
+        // Connection error
+        socket.on('connect_error', (error) => {
+            console.error('Connection Error:', error);
+        });
+    </script>
+</body>
+</html>
