@@ -83,17 +83,34 @@
 # # Requirements for running:
 # # pip install flask flask-socketio flask-cors
 
-import json
-import random
-from datetime import datetime
+# import json
+# import random
+# from datetime import datetime
+# from flask import Flask, jsonify
+# from flask_socketio import SocketIO
+# from flask_cors import CORS
+# import os
+
+# app = Flask(__name__)
+# CORS(app)
+# socketio = SocketIO(app, cors_allowed_origins="*")
+import os
 from flask import Flask, jsonify
 from flask_socketio import SocketIO
 from flask_cors import CORS
-import os
+import json
+import random
+from datetime import datetime
+import gevent
+from gevent.pywsgi import WSGIServer
+from gevent_websocket.handler import WebSocketHandler
 
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, 
+    cors_allowed_origins="*", 
+    async_mode='gevent'
+)
 
 # Path to the JSON file
 JSON_FILE_PATH = 'fake_robot_data.json'
@@ -170,17 +187,22 @@ def handle_disconnect():
     """Handle WebSocket disconnection"""
     print('Client disconnected')
 
+# if __name__ == '__main__':
+#     # Ensure JSON file exists in the same directory
+#     if not os.path.exists(JSON_FILE_PATH):
+#         print(f"Error: {JSON_FILE_PATH} must be in the same directory as this script")
+#         exit(1)
+    
+#     # Start the background task for updating robot data
+#     socketio.start_background_task(broadcast_robot_data)
+    
+#     # Run the Flask-SocketIO app
+#     socketio.run(app, debug=True, port=5000)
 if __name__ == '__main__':
-    # Ensure JSON file exists in the same directory
-    if not os.path.exists(JSON_FILE_PATH):
-        print(f"Error: {JSON_FILE_PATH} must be in the same directory as this script")
-        exit(1)
-    
-    # Start the background task for updating robot data
-    socketio.start_background_task(broadcast_robot_data)
-    
-    # Run the Flask-SocketIO app
-    socketio.run(app, debug=True, port=5000)
-
+    # For production deployment
+    port = int(os.environ.get('PORT', 5000))
+    http_server = WSGIServer(('', port), app, handler_class=WebSocketHandler)
+    print(f'Server starting on port {port}')
+    http_server.serve_forever()
 # Requirements:
 # pip install flask flask-socketio flask-cors
