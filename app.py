@@ -90,8 +90,7 @@ from flask import Flask, jsonify
 from flask_socketio import SocketIO
 from flask_cors import CORS
 import os
-import eventlet
-eventlet.monkey_patch()
+
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
